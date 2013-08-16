@@ -4,7 +4,7 @@ generate .classpath, .project
 
 build
 
-    gradle build
+    gradle build integrationTest
 
 in eclipse
 

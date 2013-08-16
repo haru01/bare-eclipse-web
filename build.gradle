@@ -1,3 +1,4 @@
+apply plugin: 'tomcat'
 apply plugin: 'groovy'
 apply plugin: 'java'
 apply plugin: 'war'
@@ -26,9 +27,51 @@ dependencies {
     testCompile group:'org.seleniumhq.selenium', name: 'selenium-htmlunit-driver', version: '2.33.0'
 }
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'org.gradle.api.plugins:gradle-tomcat-plugin:0.9.9'
+    }
+}
+
+dependencies {
+    def tomcatVersion = '7.0.11'
+    tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
+           "org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}"
+    tomcat("org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}") {
+        exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
+    }
+}
+
+[tomcatRunWar, tomcatStop]*.stopPort = 8081
+[tomcatRunWar, tomcatStop]*.stopKey = 'stopKey'
+
+task integrationTest(type: Test) {
+    include '**/*IntegrationTest.*'
+    testReportDir = reporting.file("htmlunit/integrationTests")
+    testResultsDir = file("$buildDir/test-results/htmlunit/integrationTests")
+    systemProperty "geb.build.reportsDir", reporting.file("htmlunit/geb")
+    systemProperties 'geb.driver': 'htmlunit'
+
+
+    doFirst {
+        tomcatRunWar.daemon = true
+        tomcatRunWar.execute()
+    }
+
+    doLast {
+        tomcatStop.execute()
+    }
+}
+
 test {
     testReportDir = reporting.file("htmlunit/tests")
     testResultsDir = file("$buildDir/test-results/htmlunit")
     systemProperty "geb.build.reportsDir", reporting.file("htmlunit/geb")
     systemProperties 'geb.driver': 'htmlunit'
+    exclude '**/*IntegrationTest.*'
 }
+
