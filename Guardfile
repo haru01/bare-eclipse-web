@@ -1,5 +1,5 @@
 guard :shell do
-  watch /(.*\.java|.*\.properties)/ do |m|
+  watch /(.*\.java|.*\.groovy)/ do |m|
     `gradle build integrationTest --info`
   end
 end
