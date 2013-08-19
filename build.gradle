@@ -1,4 +1,3 @@
-apply plugin: 'tomcat'
 apply plugin: 'groovy'
 apply plugin: 'java'
 apply plugin: 'war'
@@ -27,30 +26,42 @@ dependencies {
     testCompile group:'org.seleniumhq.selenium', name: 'selenium-htmlunit-driver', version: '2.33.0'
 }
 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
 
-    dependencies {
-        classpath 'org.gradle.api.plugins:gradle-tomcat-plugin:0.9.9'
+configurations { jetty9 }
+
+repositories.mavenCentral()
+
+dependencies.jetty9 'org.eclipse.jetty:jetty-ant:9.0.2.v20130417'
+
+ant {
+    taskdef(name: 'jettyRun', classname: 'org.eclipse.jetty.ant.JettyRunTask', classpath: configurations.jetty9.asPath)
+    taskdef(name: 'jettyStop', classname: 'org.eclipse.jetty.ant.JettyStopTask', classpath: configurations.jetty9.asPath)
+}
+
+project.ext {
+    contextPath = '/bare-eclipse-web'
+    port = 8080
+    stopPort = stopKey = 9999
+}
+
+task jettyRunWar(dependsOn: war) << {
+    ant.jettyRun(jettyPort: project.ext.port) {
+        webApp(war: war.archivePath, contextPath: project.ext.contextPath)
     }
 }
 
-dependencies {
-    def tomcatVersion = '7.0.11'
-    tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
-           "org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}"
-    tomcat("org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}") {
-        exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
+task jettyStart(dependsOn: war) << {
+    ant.jettyRun(daemon: true, jettyPort: project.ext.port, stopPort: project.ext.stopPort, stopKey: project.ext.stopKey) {
+        webApp(war: war.archivePath, contextPath: project.ext.contextPath)
     }
 }
 
-[tomcatRunWar, tomcatStop]*.stopPort = 8081
-[tomcatRunWar, tomcatStop]*.stopKey = 'stopKey'
+task jettyStop << {
+    ant.jettyStop(stopWait: 1, stopPort: project.ext.stopPort, stopKey: project.ext.stopKey)
+}
 
 task integrationTest(type: Test) {
-    include '**/*IntegrationTest.*'
+    include 'it/*IntegrationTest.*'
     testReportDir = reporting.file("htmlunit/integrationTests")
     testResultsDir = file("$buildDir/test-results/htmlunit/integrationTests")
     systemProperty "geb.build.reportsDir", reporting.file("htmlunit/geb")
@@ -58,12 +69,11 @@ task integrationTest(type: Test) {
 
 
     doFirst {
-        tomcatRunWar.daemon = true
-        tomcatRunWar.execute()
+        jettyStart.execute()
     }
 
     doLast {
-        tomcatStop.execute()
+        jettyStop.execute()
     }
 }
 
