@@ -82,6 +82,6 @@ test {
     testResultsDir = file("$buildDir/test-results/htmlunit")
     systemProperty "geb.build.reportsDir", reporting.file("htmlunit/geb")
     systemProperties 'geb.driver': 'htmlunit'
-    exclude '**/*IntegrationTest.*'
+    exclude 'it/*IntegrationTest.*'
 }
 

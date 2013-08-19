@@ -6,6 +6,11 @@ build
 
     gradle build integrationTest
 
+
+guard
+
+    guard
+
 in eclipse
 
     VM arguments: -Dgeb.build.reportsDir=/tmp
