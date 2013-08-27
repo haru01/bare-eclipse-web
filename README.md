@@ -18,3 +18,8 @@ in eclipse
 
 ## TODO
 - database
+
+## See
+
+### flywaydb
+- http://flywaydb.org/getstarted/firststeps/gradle.html

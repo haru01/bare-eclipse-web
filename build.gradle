@@ -29,6 +29,22 @@ dependencies {
 test {
     exclude 'it/*IntegrationTest.*'
 }
+// flyway
+apply plugin: 'flyway'
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.h2database:h2:1.3.170'
+        classpath "com.googlecode.flyway:flyway-gradle-plugin:2.2.1"
+    }
+}
+
+flyway {
+    url = 'jdbc:h2:file:target/foobar'
+    user = 'sa'
+}
 
 // integration Test with jetty9
 configurations { jetty9 }
