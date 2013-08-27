@@ -26,10 +26,12 @@ dependencies {
     testCompile group:'org.seleniumhq.selenium', name: 'selenium-htmlunit-driver', version: '2.33.0'
 }
 
+test {
+    exclude 'it/*IntegrationTest.*'
+}
 
+// integration Test with jetty9
 configurations { jetty9 }
-
-repositories.mavenCentral()
 
 dependencies.jetty9 'org.eclipse.jetty:jetty-ant:9.0.2.v20130417'
 
@@ -76,12 +78,3 @@ task integrationTest(type: Test) {
         jettyStop.execute()
     }
 }
-
-test {
-    testReportDir = reporting.file("htmlunit/tests")
-    testResultsDir = file("$buildDir/test-results/htmlunit")
-    systemProperty "geb.build.reportsDir", reporting.file("htmlunit/geb")
-    systemProperties 'geb.driver': 'htmlunit'
-    exclude 'it/*IntegrationTest.*'
-}
-

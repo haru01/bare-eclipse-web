@@ -17,6 +17,4 @@ in eclipse
 
 
 ## TODO
-- build war
 - database
-- jetty
