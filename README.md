@@ -4,7 +4,7 @@ generate .classpath, .project
 
 build
 
-    gradle build integrationTest
+    GRADLE_OPTS="-XX:MaxPermSize=256M" gradle clean build integrationTest --info
 
 
 guard
